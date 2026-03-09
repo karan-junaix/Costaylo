@@ -1,0 +1,17 @@
+User-agent: *
+
+# Public pages
+Allow: /
+Allow: /pgs
+Allow: /pg/
+Allow: /help
+
+# Private pages  
+Disallow: /login
+Disallow: /dashboard
+Disallow: /dashboard/*
+Disallow: /list-property
+Disallow: /owner-dashboard
+Disallow: /owner-dashboard/*
+
+Sitemap: https://example.com/sitemap.xml
