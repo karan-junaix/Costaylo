@@ -1,14 +1,25 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 interface Filters {
   locations: string[];
   budget: [number, number];
-  occupancy: string[];
+  occupancy: number[];
   gender: string[];
   amenities: string[];
-  propertyType: string[];
+  propertyType: number[];
   moveInDate: string;
+}
+
+interface Amenity {
+  id: number;
+  name: string;
+  icon: string;
+}
+
+interface Option {
+  id: number;
+  name: string;
 }
 
 interface FilterSidebarProps {
@@ -18,6 +29,7 @@ interface FilterSidebarProps {
 }
 
 const FilterSidebar = ({ filters, onFilterChange, onReset }: FilterSidebarProps) => {
+
   const [expandedSections, setExpandedSections] = useState({
     location: true,
     budget: true,
@@ -28,38 +40,44 @@ const FilterSidebar = ({ filters, onFilterChange, onReset }: FilterSidebarProps)
     moveInDate: true
   });
 
-  const allLocations = [
-    'T. Nagar',
-    'Velachery',
-    'OMR',
-    'Guindy',
-    'Anna Nagar',
-    'Tambaram',
-    'Adyar',
-    'Porur',
-    'Chromepet',
-    'Perungudi'
-  ];
+  // ✅ NEW STATE (Dynamic)
+  const [allLocations, setAllLocations] = useState<string[]>([]);
+  const [allAmenities, setAllAmenities] = useState<Amenity[]>([]);
+  const [occupancyOptions, setOccupancyOptions] = useState<Option[]>([]);
+  const [propertyTypeOptions, setPropertyTypeOptions] = useState<Option[]>([]);
+  // ✅ FETCH FROM BACKEND
+  useEffect(() => {
+    fetchFilters();
+  }, []);
 
-  const allAmenities = [
-    'WiFi',
-    'Food',
-    'Laundry',
-    'AC',
-    'Housekeeping',
-    'Attached bathroom',
-    'CCTV',
-    'Parking'
-  ];
+  const fetchFilters = async () => {
+    try {
+      const [locRes, amenityRes, occRes, propRes] = await Promise.all([
+        axios.get("http://localhost:8000/filters/locations"),
+        axios.get("http://localhost:8000/filters/amenities"),
+        axios.get("http://localhost:8000/filters/occupancy"),
+        axios.get("http://localhost:8000/filters/property-types")
+      ]);
+
+      setAllLocations(locRes.data);
+      setAllAmenities(amenityRes.data);
+      setOccupancyOptions(occRes.data);
+      setPropertyTypeOptions(propRes.data);
+
+    } catch (err) {
+      console.error("Error fetching filters", err);
+    }
+  };
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
-
+//Location   
   const handleLocationToggle = (location: string) => {
     const newLocations = filters.locations.includes(location)
       ? filters.locations.filter(l => l !== location)
       : [...filters.locations, location];
+
     onFilterChange({ ...filters, locations: newLocations });
   };
 
@@ -71,17 +89,19 @@ const FilterSidebar = ({ filters, onFilterChange, onReset }: FilterSidebarProps)
     }
   };
 
-  const handleOccupancyToggle = (occupancy: string) => {
-    const newOccupancy = filters.occupancy.includes(occupancy)
-      ? filters.occupancy.filter(o => o !== occupancy)
-      : [...filters.occupancy, occupancy];
-    onFilterChange({ ...filters, occupancy: newOccupancy });
-  };
+  // ✅ OCCUPANCY (FIXED)
+  const handleOccupancyToggle = (id: number) => {
+    const newData = filters.occupancy.includes(id)
+      ? filters.occupancy.filter(o => o !== id)
+      : [...filters.occupancy, id];
 
+    onFilterChange({ ...filters, occupancy: newData });
+  };
   const handleGenderToggle = (gender: string) => {
     const newGender = filters.gender.includes(gender)
       ? filters.gender.filter(g => g !== gender)
       : [...filters.gender, gender];
+
     onFilterChange({ ...filters, gender: newGender });
   };
 
@@ -89,17 +109,20 @@ const FilterSidebar = ({ filters, onFilterChange, onReset }: FilterSidebarProps)
     const newAmenities = filters.amenities.includes(amenity)
       ? filters.amenities.filter(a => a !== amenity)
       : [...filters.amenities, amenity];
+
     onFilterChange({ ...filters, amenities: newAmenities });
   };
 
-  const handlePropertyTypeToggle = (type: string) => {
-    const newTypes = filters.propertyType.includes(type)
-      ? filters.propertyType.filter(t => t !== type)
-      : [...filters.propertyType, type];
-    onFilterChange({ ...filters, propertyType: newTypes });
+   // ✅ PROPERTY TYPE (FIXED)
+  const handlePropertyTypeToggle = (id: number) => {
+    const newData = filters.propertyType.includes(id)
+      ? filters.propertyType.filter(p => p !== id)
+      : [...filters.propertyType, id];
+
+    onFilterChange({ ...filters, propertyType: newData });
   };
 
-  const activeFiltersCount = 
+  const activeFiltersCount =
     filters.locations.length +
     filters.occupancy.length +
     filters.gender.length +
@@ -110,6 +133,7 @@ const FilterSidebar = ({ filters, onFilterChange, onReset }: FilterSidebarProps)
 
   return (
     <div className="bg-white rounded-lg shadow-sm sticky top-24">
+
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex justify-between items-center">
@@ -117,7 +141,7 @@ const FilterSidebar = ({ filters, onFilterChange, onReset }: FilterSidebarProps)
           {activeFiltersCount > 0 && (
             <button
               onClick={onReset}
-              className="text-sm text-[#c8155f] hover:text-[#041e40] font-medium transition-colors cursor-pointer whitespace-nowrap"
+              className="text-sm text-[#c8155f] hover:text-[#041e40] font-medium"
             >
               Clear All
             </button>
@@ -126,243 +150,214 @@ const FilterSidebar = ({ filters, onFilterChange, onReset }: FilterSidebarProps)
       </div>
 
       <div className="max-h-[calc(100vh-150px)] overflow-y-auto">
-        {/* Location Filter */}
-        <div className="border-b border-gray-200">
-          <button
-            onClick={() => toggleSection('location')}
-            className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            <span className="text-sm font-semibold text-gray-900">Location</span>
-            <i className={`ri-arrow-${expandedSections.location ? 'up' : 'down'}-s-line text-gray-500`}></i>
+
+        {/* ✅ LOCATION (Dynamic) */}
+        <div className="border-b">
+          <button onClick={() => toggleSection('location')} className="w-full px-4 py-3 flex justify-between">
+            Location
           </button>
+
           {expandedSections.location && (
             <div className="px-4 pb-4 space-y-2">
               {allLocations.map((location) => (
-                <label
-                  key={location}
-                  className="flex items-center space-x-2 cursor-pointer group"
-                >
+                <label key={location} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
                     checked={filters.locations.includes(location)}
                     onChange={() => handleLocationToggle(location)}
-                    className="w-4 h-4 text-[#c8155f] border-gray-300 rounded focus:ring-[#c8155f] cursor-pointer"
                   />
-                  <span className="text-sm text-gray-700 group-hover:text-gray-900">{location}</span>
+                  <span>{location}</span>
                 </label>
               ))}
             </div>
           )}
         </div>
 
-        {/* Budget Filter */}
-        <div className="border-b border-gray-200">
-          <button
-            onClick={() => toggleSection('budget')}
-            className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            <span className="text-sm font-semibold text-gray-900">Budget</span>
-            <i className={`ri-arrow-${expandedSections.budget ? 'up' : 'down'}-s-line text-gray-500`}></i>
+        {/* ✅ AMENITIES (Dynamic with ICON) */}
+        <div className="border-b">
+          <button onClick={() => toggleSection('amenities')} className="w-full px-4 py-3 flex justify-between">
+            Amenities
           </button>
-          {expandedSections.budget && (
-            <div className="px-4 pb-4 space-y-4">
-              <div className="space-y-2">
-                <input
-                  type="range"
-                  min="3000"
-                  max="25000"
-                  step="500"
-                  value={filters.budget[1]}
-                  onChange={(e) => handleBudgetChange(parseInt(e.target.value), true)}
-                  className="w-full accent-[#c8155f] cursor-pointer"
-                />
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">₹{filters.budget[0].toLocaleString()}</span>
-                  <span className="font-semibold text-gray-900">₹{filters.budget[1].toLocaleString()}</span>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => onFilterChange({ ...filters, budget: [3000, 8000] })}
-                  className={`px-3 py-2 text-xs rounded-md border transition-all cursor-pointer whitespace-nowrap ${
-                    filters.budget[0] === 3000 && filters.budget[1] === 8000
-                      ? 'border-[#c8155f] bg-[#c8155f]/5 text-[#c8155f] font-medium'
-                      : 'border-gray-300 text-gray-700 hover:border-[#c8155f]'
-                  }`}
-                >
-                  &lt; ₹8k
-                </button>
-                <button
-                  onClick={() => onFilterChange({ ...filters, budget: [8000, 12000] })}
-                  className={`px-3 py-2 text-xs rounded-md border transition-all cursor-pointer whitespace-nowrap ${
-                    filters.budget[0] === 8000 && filters.budget[1] === 12000
-                      ? 'border-[#c8155f] bg-[#c8155f]/5 text-[#c8155f] font-medium'
-                      : 'border-gray-300 text-gray-700 hover:border-[#c8155f]'
-                  }`}
-                >
-                  ₹8k - ₹12k
-                </button>
-                <button
-                  onClick={() => onFilterChange({ ...filters, budget: [12000, 18000] })}
-                  className={`px-3 py-2 text-xs rounded-md border transition-all cursor-pointer whitespace-nowrap ${
-                    filters.budget[0] === 12000 && filters.budget[1] === 18000
-                      ? 'border-[#c8155f] bg-[#c8155f]/5 text-[#c8155f] font-medium'
-                      : 'border-gray-300 text-gray-700 hover:border-[#c8155f]'
-                  }`}
-                >
-                  ₹12k - ₹18k
-                </button>
-                <button
-                  onClick={() => onFilterChange({ ...filters, budget: [18000, 25000] })}
-                  className={`px-3 py-2 text-xs rounded-md border transition-all cursor-pointer whitespace-nowrap ${
-                    filters.budget[0] === 18000 && filters.budget[1] === 25000
-                      ? 'border-[#c8155f] bg-[#c8155f]/5 text-[#c8155f] font-medium'
-                      : 'border-gray-300 text-gray-700 hover:border-[#c8155f]'
-                  }`}
-                >
-                  &gt; ₹18k
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
 
-        {/* Occupancy Type Filter */}
-        <div className="border-b border-gray-200">
-          <button
-            onClick={() => toggleSection('occupancy')}
-            className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            <span className="text-sm font-semibold text-gray-900">Occupancy Type</span>
-            <i className={`ri-arrow-${expandedSections.occupancy ? 'up' : 'down'}-s-line text-gray-500`}></i>
-          </button>
-          {expandedSections.occupancy && (
-            <div className="px-4 pb-4 space-y-2">
-              {['Single', 'Double', 'Triple', '4+ Sharing'].map((type) => (
-                <label
-                  key={type}
-                  className="flex items-center space-x-2 cursor-pointer group"
-                >
-                  <input
-                    type="checkbox"
-                    checked={filters.occupancy.includes(type)}
-                    onChange={() => handleOccupancyToggle(type)}
-                    className="w-4 h-4 text-[#c8155f] border-gray-300 rounded focus:ring-[#c8155f] cursor-pointer"
-                  />
-                  <span className="text-sm text-gray-700 group-hover:text-gray-900">{type}</span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Gender Filter */}
-        <div className="border-b border-gray-200">
-          <button
-            onClick={() => toggleSection('gender')}
-            className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            <span className="text-sm font-semibold text-gray-900">Gender</span>
-            <i className={`ri-arrow-${expandedSections.gender ? 'up' : 'down'}-s-line text-gray-500`}></i>
-          </button>
-          {expandedSections.gender && (
-            <div className="px-4 pb-4 space-y-2">
-              {['Male', 'Female', 'Co-ed'].map((gender) => (
-                <label
-                  key={gender}
-                  className="flex items-center space-x-2 cursor-pointer group"
-                >
-                  <input
-                    type="checkbox"
-                    checked={filters.gender.includes(gender)}
-                    onChange={() => handleGenderToggle(gender)}
-                    className="w-4 h-4 text-[#c8155f] border-gray-300 rounded focus:ring-[#c8155f] cursor-pointer"
-                  />
-                  <span className="text-sm text-gray-700 group-hover:text-gray-900">{gender}</span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Amenities Filter */}
-        <div className="border-b border-gray-200">
-          <button
-            onClick={() => toggleSection('amenities')}
-            className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            <span className="text-sm font-semibold text-gray-900">Amenities</span>
-            <i className={`ri-arrow-${expandedSections.amenities ? 'up' : 'down'}-s-line text-gray-500`}></i>
-          </button>
           {expandedSections.amenities && (
             <div className="px-4 pb-4 space-y-2">
               {allAmenities.map((amenity) => (
-                <label
-                  key={amenity}
-                  className="flex items-center space-x-2 cursor-pointer group"
-                >
+                <label key={amenity.id} className="flex items-center space-x-2">
+
                   <input
                     type="checkbox"
-                    checked={filters.amenities.includes(amenity)}
-                    onChange={() => handleAmenityToggle(amenity)}
-                    className="w-4 h-4 text-[#c8155f] border-gray-300 rounded focus:ring-[#c8155f] cursor-pointer"
+                    checked={filters.amenities.includes(amenity.name)}
+                    onChange={() => handleAmenityToggle(amenity.name)}
                   />
-                  <span className="text-sm text-gray-700 group-hover:text-gray-900">{amenity}</span>
+
+                  {/* ✅ ICON FROM DB */}
+                  <i className={amenity.icon}></i>
+
+                  <span>{amenity.name}</span>
+
                 </label>
               ))}
             </div>
           )}
         </div>
 
-        {/* Property Type Filter */}
-        <div className="border-b border-gray-200">
-          <button
-            onClick={() => toggleSection('propertyType')}
-            className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            <span className="text-sm font-semibold text-gray-900">Property Type</span>
-            <i className={`ri-arrow-${expandedSections.propertyType ? 'up' : 'down'}-s-line text-gray-500`}></i>
-          </button>
-          {expandedSections.propertyType && (
-            <div className="px-4 pb-4 space-y-2">
-              {['PG', 'Co-living', 'Hostel'].map((type) => (
-                <label
-                  key={type}
-                  className="flex items-center space-x-2 cursor-pointer group"
-                >
-                  <input
-                    type="checkbox"
-                    checked={filters.propertyType.includes(type)}
-                    onChange={() => handlePropertyTypeToggle(type)}
-                    className="w-4 h-4 text-[#c8155f] border-gray-300 rounded focus:ring-[#c8155f] cursor-pointer"
-                  />
-                  <span className="text-sm text-gray-700 group-hover:text-gray-900">{type}</span>
-                </label>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* KEEP OTHER FILTERS SAME (no change needed) */}
+        {/* ✅ BUDGET */}
+{/* ✅ BUDGET (INTERACTIVE - OLD STYLE RESTORED) */}
+<div className="border-b">
+  <button
+    onClick={() => toggleSection('budget')}
+    className="w-full px-4 py-3 flex justify-between"
+  >
+    Budget
+  </button>
 
-        {/* Move-in Date Filter */}
-        <div className="border-b border-gray-200">
-          <button
-            onClick={() => toggleSection('moveInDate')}
-            className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            <span className="text-sm font-semibold text-gray-900">Move-in Date</span>
-            <i className={`ri-arrow-${expandedSections.moveInDate ? 'up' : 'down'}-s-line text-gray-500`}></i>
-          </button>
-          {expandedSections.moveInDate && (
-            <div className="px-4 pb-4">
-              <input
-                type="date"
-                value={filters.moveInDate}
-                onChange={(e) => onFilterChange({ ...filters, moveInDate: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[#c8155f] focus:border-transparent outline-none cursor-pointer"
-              />
-            </div>
-          )}
-        </div>
+  {expandedSections.budget && (
+    <div className="px-4 pb-4 space-y-4">
+
+      {/* RANGE SLIDER */}
+      <input
+        type="range"
+        min={0}
+        max={50000}
+        step={500}
+        value={filters.budget[1]}
+        onChange={(e) =>
+          handleBudgetChange(Number(e.target.value), true)
+        }
+        className="w-full"
+      />
+
+      {/* MIN / MAX INPUTS */}
+      <div className="flex items-center gap-2">
+
+        {/* MIN */}
+        <input
+          type="number"
+          value={filters.budget[0]}
+          onChange={(e) =>
+            handleBudgetChange(Number(e.target.value), false)
+          }
+          className="w-1/2 border rounded p-2"
+          placeholder="Min"
+        />
+
+        <span>-</span>
+
+        {/* MAX */}
+        <input
+          type="number"
+          value={filters.budget[1]}
+          onChange={(e) =>
+            handleBudgetChange(Number(e.target.value), true)
+          }
+          className="w-1/2 border rounded p-2"
+          placeholder="Max"
+        />
+      </div>
+
+      {/* DISPLAY */}
+      <div className="flex justify-between text-sm text-gray-600">
+        <span>₹{filters.budget[0]}</span>
+        <span>₹{filters.budget[1]}</span>
+      </div>
+
+    </div>
+  )}
+</div>
+
+{/* OCCUPANCY (DYNAMIC + FIXED) */}
+    <div className="border-b">
+  <button
+    onClick={() => toggleSection('occupancy')}
+    className="w-full px-4 py-3 flex justify-between"
+  >
+    Occupancy
+  </button>
+
+  {expandedSections.occupancy && (
+    <div className="px-4 pb-4 space-y-2">
+      {occupancyOptions.map((opt) => (
+        <label key={opt.id} className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={filters.occupancy.includes(opt.id)}
+            onChange={() => handleOccupancyToggle(opt.id)}
+          />
+          <span>{opt.name}</span>
+        </label>
+      ))}
+    </div>
+  )}
+</div>
+
+
+{/* ✅ GENDER */}
+<div className="border-b">
+  <button onClick={() => toggleSection('gender')} className="w-full px-4 py-3 flex justify-between">
+    Gender
+  </button>
+
+  {expandedSections.gender && (
+    <div className="px-4 pb-4 space-y-2">
+      {["Male", "Female", "Unisex"].map((g) => (
+        <label key={g} className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={filters.gender.includes(g)}
+            onChange={() => handleGenderToggle(g)}
+          />
+          <span>{g}</span>
+        </label>
+      ))}
+    </div>
+  )}
+</div>
+
+ {/* PROPERTY TYPE (DYNAMIC + FIXED) */}
+      <div className="border-b">
+  <button
+    onClick={() => toggleSection('propertyType')}
+    className="w-full px-4 py-3 flex justify-between"
+  >
+    Property Type
+  </button>
+
+  {expandedSections.propertyType && (
+    <div className="px-4 pb-4 space-y-2">
+      {propertyTypeOptions.map((opt) => (
+        <label key={opt.id} className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={filters.propertyType.includes(opt.id)}
+            onChange={() => handlePropertyTypeToggle(opt.id)}
+          />
+          <span>{opt.name}</span>
+        </label>
+      ))}
+    </div>
+  )}
+</div>
+
+{/* ✅ MOVE-IN DATE */}
+<div className="border-b">
+  <button onClick={() => toggleSection('moveInDate')} className="w-full px-4 py-3 flex justify-between">
+    Move-in Date
+  </button>
+
+  {expandedSections.moveInDate && (
+    <div className="px-4 pb-4">
+      <input
+        type="date"
+        value={filters.moveInDate}
+        onChange={(e) =>
+          onFilterChange({ ...filters, moveInDate: e.target.value })
+        }
+        className="border p-2 w-full rounded"
+      />
+    </div>
+  )}
+</div>
       </div>
     </div>
   );

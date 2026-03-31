@@ -1,99 +1,41 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const FeaturedPGs = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const properties = [
-    {
-      id: 1,
-      name: 'Comfort Stay PG',
-      location: 'T. Nagar, Chennai',
-      price: 8500,
-      occupancy: 'Double Sharing',
-      image: 'https://readdy.ai/api/search-image?query=Modern%20comfortable%20PG%20room%20interior%20with%20two%20beds%2C%20clean%20white%20walls%2C%20wooden%20furniture%2C%20study%20desk%2C%20wardrobe%2C%20bright%20natural%20lighting%20from%20large%20window%2C%20minimalist%20decor%2C%20cozy%20atmosphere%2C%20professional%20photography%2C%20neat%20and%20organized%20space&width=800&height=600&seq=pg-001&orientation=landscape',
-      amenities: ['WiFi', 'AC', 'Food', 'Laundry'],
-      rating: 4.5,
-      featured: true
-    },
-    {
-      id: 2,
-      name: 'Elite Residency',
-      location: 'Velachery, Chennai',
-      price: 12000,
-      occupancy: 'Single Room',
-      image: 'https://readdy.ai/api/search-image?query=Premium%20single%20occupancy%20PG%20room%20with%20modern%20bed%2C%20study%20table%2C%20chair%2C%20wardrobe%2C%20air%20conditioning%2C%20bright%20lighting%2C%20clean%20white%20walls%2C%20wooden%20flooring%2C%20contemporary%20design%2C%20professional%20photography%2C%20spacious%20and%20comfortable&width=800&height=600&seq=pg-002&orientation=landscape',
-      amenities: ['WiFi', 'AC', 'Food', 'Gym'],
-      rating: 4.7,
-      featured: true
-    },
-    {
-      id: 3,
-      name: 'Urban Nest PG',
-      location: 'OMR, Chennai',
-      price: 9500,
-      occupancy: 'Double Sharing',
-      image: 'https://readdy.ai/api/search-image?query=Contemporary%20double%20sharing%20PG%20accommodation%20with%20twin%20beds%2C%20modern%20furniture%2C%20study%20area%2C%20storage%20space%2C%20clean%20white%20walls%2C%20good%20lighting%2C%20minimalist%20aesthetic%2C%20professional%20photography%2C%20comfortable%20living%20space&width=800&height=600&seq=pg-003&orientation=landscape',
-      amenities: ['WiFi', 'AC', 'Food', 'Parking'],
-      rating: 4.6,
-      featured: true
-    },
-    {
-      id: 4,
-      name: 'Green Valley PG',
-      location: 'Anna Nagar, Chennai',
-      price: 7500,
-      occupancy: 'Triple Sharing',
-      image: 'https://readdy.ai/api/search-image?query=Spacious%20triple%20sharing%20PG%20room%20with%20three%20beds%2C%20study%20desks%2C%20wardrobes%2C%20clean%20white%20walls%2C%20bright%20natural%20lighting%2C%20organized%20layout%2C%20modern%20furniture%2C%20professional%20photography%2C%20comfortable%20and%20affordable%20accommodation&width=800&height=600&seq=pg-004&orientation=landscape',
-      amenities: ['WiFi', 'Food', 'Laundry', 'Security'],
-      rating: 4.4,
-      featured: true
-    },
-    {
-      id: 5,
-      name: 'Prime Stay',
-      location: 'Guindy, Chennai',
-      price: 11000,
-      occupancy: 'Single Room',
-      image: 'https://readdy.ai/api/search-image?query=Elegant%20single%20room%20PG%20with%20queen%20bed%2C%20work%20desk%2C%20modern%20chair%2C%20wardrobe%2C%20air%20conditioning%2C%20clean%20white%20walls%2C%20wooden%20accents%2C%20bright%20lighting%2C%20professional%20photography%2C%20premium%20accommodation&width=800&height=600&seq=pg-005&orientation=landscape',
-      amenities: ['WiFi', 'AC', 'Food', 'Housekeeping'],
-      rating: 4.8,
-      featured: true
-    },
-    {
-      id: 6,
-      name: 'Cozy Corner PG',
-      location: 'Tambaram, Chennai',
-      price: 6500,
-      occupancy: 'Triple Sharing',
-      image: 'https://readdy.ai/api/search-image?query=Budget-friendly%20triple%20sharing%20PG%20room%20with%20three%20single%20beds%2C%20study%20area%2C%20storage%20units%2C%20clean%20white%20walls%2C%20adequate%20lighting%2C%20simple%20furniture%2C%20professional%20photography%2C%20affordable%20and%20comfortable%20living&width=800&height=600&seq=pg-006&orientation=landscape',
-      amenities: ['WiFi', 'Food', 'Laundry', 'Security'],
-      rating: 4.3,
-      featured: true
-    },
-    {
-      id: 7,
-      name: 'Skyline Residency',
-      location: 'Adyar, Chennai',
-      price: 13500,
-      occupancy: 'Single Room',
-      image: 'https://readdy.ai/api/search-image?query=Luxurious%20single%20occupancy%20PG%20room%20with%20modern%20bed%2C%20premium%20furniture%2C%20study%20desk%2C%20wardrobe%2C%20air%20conditioning%2C%20clean%20white%20walls%2C%20elegant%20decor%2C%20bright%20lighting%2C%20professional%20photography%2C%20upscale%20accommodation&width=800&height=600&seq=pg-007&orientation=landscape',
-      amenities: ['WiFi', 'AC', 'Food', 'Gym'],
-      rating: 4.9,
-      featured: true
-    },
-    {
-      id: 8,
-      name: 'Student Hub PG',
-      location: 'Porur, Chennai',
-      price: 8000,
-      occupancy: 'Double Sharing',
-      image: 'https://readdy.ai/api/search-image?query=Student-friendly%20double%20sharing%20PG%20room%20with%20two%20beds%2C%20study%20tables%2C%20bookshelves%2C%20wardrobes%2C%20clean%20white%20walls%2C%20good%20lighting%2C%20organized%20space%2C%20professional%20photography%2C%20ideal%20for%20students&width=800&height=600&seq=pg-008&orientation=landscape',
-      amenities: ['WiFi', 'Food', 'Laundry', 'Study Room'],
-      rating: 4.5,
-      featured: true
-    }
-  ];
+const [properties, setProperties] = useState<any[]>([]);
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  fetch("http://127.0.0.1:8000/pgs/featured")
+    .then(res => res.json())
+    .then(data => {
+      const formatted = data.map((pg: any) => ({
+        id: pg.id,
+        name: pg.title,
+        location: pg.locality,
+        price: pg.starting_price,
+        occupancy: pg.occupancy || "N/A",
+        image: pg.images?.[0]?.image_url
+          ? `http://127.0.0.1:8000/${pg.images[0].image_url}`
+          : "/placeholder.jpg",
+        amenities: Array.isArray(pg.amenities)
+    ? pg.amenities.filter((a: any) => typeof a === "string")
+    : [] ,
+        rating: pg.rating || 4.5,
+        featured: true
+      }));
+
+      setProperties(formatted);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error(err);
+      setLoading(false);
+    });
+}, []);
+
 
   const itemsPerView = 4;
   const maxIndex = Math.max(0, properties.length - itemsPerView);
@@ -203,15 +145,16 @@ const FeaturedPGs = () => {
 
                       {/* Amenities */}
                       <div className="grid grid-cols-2 gap-2">
-                        {property.amenities.map((amenity, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center text-xs text-gray-600"
-                          >
-                            <i className="ri-check-line text-[#c8155f] mr-1"></i>
-                            <span>{amenity}</span>
-                          </div>
-                        ))}
+                        {Array.isArray(property.amenities) &&
+  property.amenities.map((amenity, index) => (
+    <div
+      key={index}
+      className="flex items-center text-xs text-gray-600"
+    >
+      <i className="ri-check-line text-[#c8155f] mr-1"></i>
+      <span>{amenity || "N/A"}</span>
+    </div>
+  ))}
                       </div>
                     </div>
                   </Link>

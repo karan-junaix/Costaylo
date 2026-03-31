@@ -1,6 +1,19 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
+  const [contact, setContact] = useState(null);
+
+  useEffect(() => {
+  fetch("http://localhost:8000/footer/")
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("Footer API:", data);   // 👈 ADD THIS
+      setContact(data);
+    })
+    .catch((err) => console.error(err));
+}, []);
+
   return (
     <footer className="bg-gradient-to-br from-[#041e40] to-[#0a2d5c] text-white">
       <div className="max-w-7xl mx-auto px-6 py-16">
@@ -26,11 +39,11 @@ const Footer = () => {
                   PGs / Co-living
                 </Link>
               </li>
-              <li>
+             { /*<li>
                 <Link to="/hostels" className="text-gray-300 hover:text-[#c8155f] transition-colors cursor-pointer">
                   Hostels
                 </Link>
-              </li>
+              </li>*/}
               <li>
                 <Link to="/about" className="text-gray-300 hover:text-[#c8155f] transition-colors cursor-pointer">
                   About Us
@@ -86,8 +99,8 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact Info */}
-          <div>
+          
+          {/*<div>
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-3">
               <li className="flex items-start space-x-3">
@@ -125,7 +138,56 @@ const Footer = () => {
               </ul>
             </div>
           </div>
+        </div>*/}
+        {/* Contact Info (Dynamic) */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
+            <ul className="space-y-3">
+
+              {/* Address */}
+              <li className="flex items-start space-x-3">
+                <div className="w-5 h-5 flex items-center justify-center">
+                  <i className="ri-map-pin-line text-[#c8155f]"></i>
+                </div>
+                <span className="text-gray-300 text-sm">
+                  {contact?.address || "Loading address..."}
+                </span>
+              </li>
+
+              {/* Phone */}
+              <li className="flex items-center space-x-3">
+                <div className="w-5 h-5 flex items-center justify-center">
+                  <i className="ri-phone-line text-[#c8155f]"></i>
+                </div>
+                <span className="text-gray-300 text-sm">
+                  {contact?.phone || "Loading phone..."}
+                </span>
+              </li>
+
+              {/* Email */}
+              <li className="flex items-center space-x-3">
+                <div className="w-5 h-5 flex items-center justify-center">
+                  <i className="ri-mail-line text-[#c8155f]"></i>
+                </div>
+                <span className="text-gray-300 text-sm">
+                  {contact?.email || "Loading email..."}
+                </span>
+              </li>
+
+            </ul>
+
+            {/* Legal */}
+            <div className="mt-6">
+              <h4 className="text-sm font-semibold mb-3">Legal</h4>
+              <ul className="space-y-2">
+                <li><Link to="/terms" className="text-gray-300 text-sm hover:text-[#c8155f]">Terms of Service</Link></li>
+                <li><Link to="/privacy" className="text-gray-300 text-sm hover:text-[#c8155f]">Privacy Policy</Link></li>
+              </ul>
+            </div>
+          </div>
+
         </div>
+
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-600 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
@@ -169,7 +231,7 @@ const Footer = () => {
         </div>
 
         {/* Quick Link */}
-        <div className="text-center mt-6">
+        {/*<div className="text-center mt-6">
           <a
             href="https://readdy.ai/?origin=logo"
             target="_blank"
@@ -178,7 +240,7 @@ const Footer = () => {
           >
             Website Builder
           </a>
-        </div>
+        </div>*/}
       </div>
     </footer>
   );

@@ -8,7 +8,14 @@ class Amenity(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
+    icon = Column(String)
 
-    pg_id = Column(Integer, ForeignKey("pgs.id"))
+   # pg_id = Column(Integer, ForeignKey("pg_properties.id"))
 
-    pg = relationship("PG", back_populates="amenities")
+   # pg = relationship("PG", back_populates="amenity")
+    pg_amenities = relationship("PGAmenity", back_populates="amenity")
+    pgs = relationship(
+        "PG",
+        secondary="pg_amenities",
+        viewonly=True
+    )

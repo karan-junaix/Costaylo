@@ -8,6 +8,6 @@ class PGImage(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     image_url = Column(String, nullable=False)
-    pg_id = Column(Integer, ForeignKey("pgs.id"))
+    pg_id = Column(Integer, ForeignKey("pg_properties.id"))
 
     pg = relationship("PG", back_populates="images")

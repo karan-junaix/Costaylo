@@ -12,7 +12,7 @@ class Lead(Base):
     email = Column(String, nullable=True)
     move_in_date = Column(Date, nullable=True)
 
-    pg_id = Column(Integer, ForeignKey("pgs.id"))
+    pg_id = Column(Integer, ForeignKey("pg_properties.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
 
     pg = relationship("PG", back_populates="leads")

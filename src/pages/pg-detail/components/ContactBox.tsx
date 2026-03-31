@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 
 interface ContactBoxProps {
   pgName: string;
@@ -15,6 +15,19 @@ const ContactBox = ({ pgName, startingPrice, pgId }: ContactBoxProps) => {
   });
 
   const [showSuccess, setShowSuccess] = useState(false);
+    const [adminNumber, setAdminNumber] = useState("");
+
+  // ✅ NEW: Fetch admin contact from backend
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/footer/")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.admin_contact) {
+          setAdminNumber(data.admin_contact);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch contact:", err));
+  }, []);
 
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
@@ -54,10 +67,19 @@ const ContactBox = ({ pgName, startingPrice, pgId }: ContactBoxProps) => {
     }, 3000);
   };
 
-  const handleWhatsApp = () => {
-    const message = `Hi, I'm interested in ${pgName}. I would like to schedule a visit.`;
-    window.open(`https://wa.me/919952039032?text=${encodeURIComponent(message)}`, '_blank');
-  };
+ const handleWhatsApp = () => {
+  if (!adminNumber) {
+    alert("Contact number not available");
+    return;
+  }
+
+  const message = `Hi, I'm interested in ${pgName}. I would like to schedule a visit.`;
+
+  window.open(
+    `https://wa.me/${adminNumber}?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
+};
 
   return (
     <div className="sticky top-32">
@@ -74,7 +96,7 @@ const ContactBox = ({ pgName, startingPrice, pgId }: ContactBoxProps) => {
         {/* Success Message */}
         {showSuccess && (
           <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2 text-green-700">
-            <i className="ri-checkbox-circle-line text-xl"></i>
+             <i className="ri-checkbox-circle-line text-xl"></i>
             <span className="text-sm font-medium">Request submitted successfully!</span>
           </div>
         )}

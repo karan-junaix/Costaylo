@@ -1,9 +1,30 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const TopLocalities = () => {
+  
+
+  // ✅ state must be inside component
+  const [counts, setCounts] = useState<{ [key: string]: number }>({});
+  const navigate = useNavigate();
+  // ✅ API call inside component
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/pgs/locality-counts")
+      .then((res) => res.json())
+      .then((data) => {
+        const map: any = {};
+        data.forEach((item: any) => {
+          map[item.slug] = item.count;
+        });
+        setCounts(map);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
   const localities = [
     {
-      name: 'T. Nagar',
+      name: 'T Nagar',
       properties: 342,
       image: 'https://readdy.ai/api/search-image?query=Vibrant%20urban%20neighborhood%20street%20view%20in%20T%20Nagar%20Chennai%20with%20modern%20buildings%2C%20busy%20commercial%20area%2C%20clean%20streets%2C%20shops%20and%20establishments%2C%20bright%20daylight%2C%20professional%20photography%2C%20clear%20blue%20sky%2C%20bustling%20city%20atmosphere%2C%20contemporary%20architecture&width=600&height=400&seq=locality-001&orientation=landscape',
       slug: 't-nagar'
@@ -54,9 +75,17 @@ const TopLocalities = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {localities.map((locality) => (
-            <Link
+            <div  // replace Link with div for better hover effect, we will handle navigation in onClick
               key={locality.slug}
-              to={`/locality/${locality.slug}`}
+               onClick={() => {
+                const params = new URLSearchParams();
+                params.append("locations", locality.name);
+               
+
+                navigate(`/pgs?${params.toString()}`);
+                window.scrollTo(0, 0);
+              }}
+              //to={`/locality/${locality.slug}`}
               className="group relative rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-105 cursor-pointer"
             >
               <div className="relative w-full h-64">
@@ -71,7 +100,7 @@ const TopLocalities = () => {
               {/* Property Count Badge */}
               <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg">
                 <span className="text-sm font-semibold text-gray-800">
-                  {locality.properties} PGs
+                    {counts[locality.slug] || 0} PGs
                 </span>
               </div>
 
@@ -86,14 +115,14 @@ const TopLocalities = () => {
                 </div>
               </div>
 
-              {/* Hover Overlay */}
+              
               <div className="absolute inset-0 bg-gradient-to-t from-[#c8155f]/80 to-[#041e40]/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <div className="text-white text-center">
                   <i className="ri-arrow-right-circle-line text-5xl mb-2"></i>
                   <p className="font-semibold">Explore PGs</p>
                 </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       </div>

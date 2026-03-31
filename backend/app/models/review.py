@@ -9,7 +9,7 @@ class Review(Base):
     __tablename__ = "reviews"
 
     id = Column(Integer, primary_key=True, index=True)
-    pg_id = Column(Integer, ForeignKey("pgs.id"))  # ✅ VERY IMPORTANT
+    pg_id = Column(Integer, ForeignKey("pg_properties.id"))  # ✅ VERY IMPORTANT
     user_name = Column(String, nullable=False)
     rating = Column(Integer, nullable=False)
     comment = Column(String, nullable=True)

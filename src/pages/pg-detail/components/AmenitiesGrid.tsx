@@ -26,7 +26,15 @@ const AmenitiesGrid = ({ amenities }: AmenitiesGridProps) => {
             <div className={`w-10 h-10 flex items-center justify-center rounded-full ${
               amenity.available ? 'bg-gradient-to-br from-[#c8155f]/10 to-[#041e40]/10' : 'bg-gray-200'
             }`}>
-              <i className={`${amenity.icon} text-xl ${amenity.available ? 'text-[#c8155f]' : 'text-gray-400'}`}></i>
+              <i
+                className={`${
+                  amenity.icon && amenity.icon.startsWith("ri-")
+                    ? amenity.icon
+                    : "ri-checkbox-blank-circle-line"
+                } text-xl ${
+                  amenity.available ? "text-[#c8155f]" : "text-gray-400"
+                }`}
+              ></i>
             </div>
             <span className={`font-medium text-sm ${amenity.available ? 'text-gray-900' : 'text-gray-500'}`}>
               {amenity.name}

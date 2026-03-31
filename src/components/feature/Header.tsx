@@ -13,7 +13,7 @@ const Header = () => {
             <img
               src="https://static.readdy.ai/image/0be37e4d464cdcdfc96c4a625bbb732f/46c7907775a13ea6d80472ef874ec660.png"
               alt="CoStaylo Logo"
-              className="h-14 w-auto"
+              className="h-20 w-auto"
             />
           </Link>
 

@@ -78,9 +78,14 @@ const PGDetailPage = () => {
           latitude: data.latitude,
           longitude: data.longitude,
 
-          images: data.images ?? [
+          /*images: data.images ?? [
             "https://via.placeholder.com/1200x600",
-          ],
+          ],*/
+           // ✅ IMAGE MAPPING
+          images:
+           data.images?.map((img: any) =>
+            `http://127.0.0.1:8000/${img.image_url}`
+          ) ?? ["https://via.placeholder.com/1200x600"],
 
              amenities: data.amenities ?? [
             { name: "WiFi", icon: "ri-wifi-line", available: true },
